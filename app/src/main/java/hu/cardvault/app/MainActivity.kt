@@ -82,9 +82,28 @@ class MainActivity : FragmentActivity() {
                             Spacer(Modifier.height(12.dp))
                             Button(onClick = { authenticate() }) { Text("Feloldás") }
                         } else if (appsPage) {
-                            Text("Engedélyezett alkalmazások", style = MaterialTheme.typography.titleLarge)
-                            Text("A CardVault csak a kiválasztott alkalmazásokban kínál kitöltést. A lista a megnyitható alkalmazásokat mutatja.")
-                            Spacer(Modifier.height(12.dp))
+                            var appSearch by remember { mutableStateOf("") }
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                TextButton(onClick = { appsPage = false }) {
+                                    Text("← Vissza", style = MaterialTheme.typography.titleMedium)
+                                }
+                                Text("Alkalmazások", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                            }
+                            Text("A CardVault csak a kiválasztott alkalmazásokban kínál kitöltést.")
+                            Spacer(Modifier.height(10.dp))
+                            OutlinedTextField(
+                                value = appSearch,
+                                onValueChange = { appSearch = it },
+                                modifier = Modifier.fillMaxWidth(),
+                                singleLine = true,
+                                label = { Text("Alkalmazás keresése") },
+                                leadingIcon = { Text("⌕", style = MaterialTheme.typography.headlineSmall) }
+                            )
+                            Spacer(Modifier.height(8.dp))
                             val apps = remember {
                                 val intent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
                                 @Suppress("DEPRECATION")
@@ -92,7 +111,10 @@ class MainActivity : FragmentActivity() {
                                     .map { it.activityInfo.packageName to it.loadLabel(context.packageManager).toString() }
                                     .distinctBy { it.first }.sortedBy { it.second.lowercase() }
                             }
-                            apps.forEach { (pkg, label) ->
+                            apps.filter { (pkg, label) ->
+                                appSearch.isBlank() || label.contains(appSearch, ignoreCase = true) ||
+                                    pkg.contains(appSearch, ignoreCase = true)
+                            }.forEach { (pkg, label) ->
                                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                                     Text("$label\n$pkg", Modifier.weight(1f), style = MaterialTheme.typography.bodySmall)
                                     Checkbox(checked = pkg in allowed, onCheckedChange = {
@@ -102,8 +124,12 @@ class MainActivity : FragmentActivity() {
                                 }
                                 HorizontalDivider()
                             }
-                            Spacer(Modifier.height(12.dp))
-                            Button(onClick = { appsPage = false }) { Text("Vissza") }
+                            if (apps.none { (pkg, label) ->
+                                    appSearch.isBlank() || label.contains(appSearch, ignoreCase = true) ||
+                                        pkg.contains(appSearch, ignoreCase = true)
+                                }) {
+                                Text("Nincs ilyen alkalmazás.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
                         } else {
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 Text("Sötét mód")
