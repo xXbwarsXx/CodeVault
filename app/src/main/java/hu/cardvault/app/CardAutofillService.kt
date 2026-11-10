@@ -26,6 +26,15 @@ class CardAutofillService : AutofillService() {
         callback: FillCallback
     ) {
         try {
+            // Do not publish an inline suggestion just because a field gained focus.
+            // Only answer an explicit user request from Android's Autofill menu.
+            // This keeps the normal keyboard/focus experience quiet while preserving
+            // the manual "Automatikus kitöltés" action.
+            if ((request.flags and FillRequest.FLAG_MANUAL_REQUEST) == 0) {
+                callback.onSuccess(null)
+                return
+            }
+
             if (!SecureStore(this).hasCard()) {
                 callback.onSuccess(null)
                 return

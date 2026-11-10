@@ -146,12 +146,28 @@ class MainActivity : FragmentActivity() {
                                 })
                             }
                             Text("Kiemelőszín", style = MaterialTheme.typography.titleSmall)
-                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Text(
+                                if (useDynamic && Build.VERSION.SDK_INT >= 31)
+                                    "A Material You színek aktívak. Kapcsold ki őket az egyéni színek használatához."
+                                else "Válassz egy kiemelőszínt:",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            FlowRow(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
                                 listOf("purple" to "Lila", "blue" to "Kék", "green" to "Zöld", "pink" to "Rózsaszín", "orange" to "Narancs").forEach { (key, label) ->
-                                    TextButton(onClick = {
-                                        accent = key
-                                        uiPrefs.edit().putString("accent", key).apply()
-                                    }) { Text(label, color = if (accent == key) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface) }
+                                    FilterChip(
+                                        selected = accent == key,
+                                        onClick = {
+                                            accent = key
+                                            uiPrefs.edit().putString("accent", key).apply()
+                                        },
+                                        enabled = !(useDynamic && Build.VERSION.SDK_INT >= 31),
+                                        label = { Text(label) }
+                                    )
                                 }
                             }
                             Spacer(Modifier.height(10.dp))
