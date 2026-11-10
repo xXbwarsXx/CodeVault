@@ -1,24 +1,25 @@
-# CardVault
+# CardVault v2 – titkosított kártyatároló + Android Autofill
 
-Minimal Android card autofill helper for Samsung Galaxy devices.
+## Funkciók
+- Android Keystore AES-256-GCM, eszközhöz kötött titkosítás, 5 perces Keystore-hitelesítési időablakkal.
+- Ujjlenyomat (BIOMETRIC_STRONG) vagy készülék-PIN/minta/jelszó. A csak gyenge biometrikusnak minősített arcfelismerés **nem** oldhatja fel a Keystore-kulcsot; ez tudatos biztonsági korlátozás.
+- Kártyaszám és lejárat helyi titkosított tárolása; CVC kizárólag memóriában, az alkalmazás háttérbe kerülésekor törlődik.
+- 3 külön másolásgomb, 30 másodperces vágólap-törlési kísérlettel. A vágólap tartalmát más alkalmazások vagy a rendszer korábban elérhetik, ezért a másolás nem tekinthető teljesen biztonságosnak.
+- Android AutofillService, amely a felismerhető bankkártyaszám- és lejáratmezőkhöz kínál kitöltést, csak az engedélyezett alkalmazásokban, azonosítást követően.
+- Engedélyezett alkalmazások képernyő; a rendszer Autofill-beállítását megnyitó gomb.
+- Android 15/16 edge-to-edge státuszsáv / navigációs sáv biztonságos margó.
+- FLAG_SECURE a képernyőképek/recents-előnézetek ellen; backup és eszközátvitel letiltva.
 
-## Build on GitHub (no Android Studio required)
+## Beállítás
+1. APK telepítése és megnyitása; telefon képernyőzárának beállítása.
+2. Hitelesítés, kártyaszám és lejárat megadása, **Kártyaadatok mentése**.
+3. **Engedélyezett alkalmazások** oldalon jelöld be a Steamet (vagy más appot).
+4. **CardVault beállítása kitöltőként**; válaszd ki a CardVaultot az Android rendszerben.
+5. A fizetési mezőnél válaszd a CardVault-ajánlatot, majd hitelesíts.
 
-1. Create a new GitHub repository named `CardVault` (public or private).
-2. Upload the **contents** of this folder to the repository root, preserving `.github/workflows/build.yml`.
-3. Open **Actions** → **Build CardVault APK** → **Run workflow**.
-4. When the run finishes, open the run and download **CardVault-debug-apk** from Artifacts.
-5. Extract `app-debug.apk` and install it on the phone.
-
-The workflow uses Temurin JDK 17, Gradle 8.11.1, Android SDK 36, and `gradle assembleDebug`.
-
-## Autofill setup
-
-CardVault does not store payment card data. Android Autofill must be enabled and configured with a provider that has the card saved. The provider decides which fields (especially the security code) it is willing to fill.
-
-## Security notes
-
-- Android biometric prompt allows BIOMETRIC_WEAK (including supported face unlock) or device credential (PIN/pattern/password).
-- `FLAG_SECURE` prevents screenshots and hides the app preview in Recents on supported Android builds.
-- The three copy actions are separate; clipboard content is cleared after 30 seconds when it is still the copied CardVault item.
-- This is an initial debug build. Review and test the lock lifecycle on the target Samsung firmware before relying on it for payment credentials.
+## Fontos korlátok
+- A Steam WebView-fizetési mezőinek Autofill-kompatibilitása nem garantált. Az alkalmazás csak az Android által továbbított és megbízhatóan felismerhető mezőket tölti ki.
+- A CVC nem tárolódik, nem autofill-olható. Ha az appot elhagyod, az ideiglenes CVC törlődik.
+- Ha az Android Keystore-kulcs elveszik (például készülékcsere, biztonsági beállítás változása), a titkosított adatok nem állíthatók helyre.
+- Az app nem került helyi Android SDK-val fordításra vagy telefonon tesztelésre ebben a környezetben. GitHub Actions fordítás és valódi készülékes teszt szükséges.
+- A helyi titkosítás nem garantál védelmet kompromittált/rootolt eszköz vagy kártékony billentyűzet ellen.
