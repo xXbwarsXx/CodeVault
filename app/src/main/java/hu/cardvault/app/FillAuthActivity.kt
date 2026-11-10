@@ -22,6 +22,8 @@ class FillAuthActivity : FragmentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // This is a transient Autofill authentication surface, not an app screen.
+        // Keep the target app visible underneath the system biometric prompt.
         window.addFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE)
 
         val fieldId = getFieldId() ?: run {
@@ -54,8 +56,9 @@ class FillAuthActivity : FragmentActivity() {
                             ?: throw IllegalStateException("Nincs mentett kártya")
                         val value = if (valueType == "number") card.first else card.second
                         val label = if (valueType == "number") "CardVault – kártyaszám" else "CardVault – lejárat"
-                        val presentation = RemoteViews(packageName, android.R.layout.simple_list_item_1).apply {
-                            setTextViewText(android.R.id.text1, label)
+                        val presentation = RemoteViews(packageName, R.layout.autofill_presentation).apply {
+                            setTextViewText(R.id.autofill_title, label)
+                            setTextViewText(R.id.autofill_subtitle, "Hitelesítve")
                         }
                         val dataset = Dataset.Builder()
                             .setValue(fieldId, AutofillValue.forText(value), presentation)

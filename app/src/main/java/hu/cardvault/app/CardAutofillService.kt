@@ -68,21 +68,23 @@ class CardAutofillService : AutofillService() {
 
     private fun authenticatedDataset(fieldId: AutofillId, valueType: String): android.service.autofill.Dataset {
         val title = if (valueType == "number") "Kártyaszám" else "Lejárati dátum"
-        val presentation = RemoteViews(packageName, android.R.layout.simple_list_item_1).apply {
-            setTextViewText(android.R.id.text1, "$title – ujjlenyomat szükséges")
+        val presentation = RemoteViews(packageName, R.layout.autofill_presentation).apply {
+            setTextViewText(R.id.autofill_title, title)
+            setTextViewText(R.id.autofill_subtitle, "Érintsd meg az azonosításhoz")
         }
 
         val authIntent = Intent(this, FillAuthActivity::class.java).apply {
             putExtra(FillAuthActivity.EXTRA_FIELD_ID, fieldId)
             putExtra(FillAuthActivity.EXTRA_VALUE_TYPE, valueType)
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
         val requestCode = if (valueType == "number") 4101 else 4102
         val pendingIntent = PendingIntent.getActivity(
             this,
             requestCode,
             authIntent,
-            PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            // Android may need to add Autofill authentication extras when it launches
+            // this PendingIntent, so it must be mutable.
+            PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_MUTABLE
         )
 
         return android.service.autofill.Dataset.Builder()

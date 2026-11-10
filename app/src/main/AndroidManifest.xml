@@ -27,6 +27,11 @@
             <intent-filter><action android:name="android.service.autofill.AutofillService" /></intent-filter>
             <meta-data android:name="android.autofill" android:resource="@xml/autofill_service" />
         </service>
-        <activity android:name=".FillAuthActivity" android:exported="false" />
+        <activity
+            android:name=".FillAuthActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:taskAffinity=""
+            android:theme="@style/Theme.CardVault.AutofillAuth" />
     </application>
 </manifest>

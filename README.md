@@ -24,3 +24,6 @@ Android must expose the focused control as an Autofill-capable node in its Assis
 
 ## Build
 The GitHub Actions workflow uses JDK 17, Android SDK 36, Gradle 8.11.1 and runs `gradle assembleDebug`.
+
+
+Autofill UI update: the suggestion now uses a dedicated dark RemoteViews layout. The authentication activity is translucent and does not launch MainActivity; it displays the Android BiometricPrompt over the target app and returns the authenticated Dataset through EXTRA_AUTHENTICATION_RESULT. The authentication PendingIntent is mutable so the Android Autofill framework can attach its fill-in arguments.
