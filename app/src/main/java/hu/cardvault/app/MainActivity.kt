@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.WindowManager
-import android.view.autofill.AutofillManager
 import android.view.View
 import android.widget.EditText
 import android.text.InputType
@@ -231,17 +230,17 @@ private fun CardVaultScreen(
             Spacer(Modifier.height(28.dp))
             Text("Bankkártya adatai", fontSize = 21.sp, fontWeight = FontWeight.SemiBold)
             Spacer(Modifier.height(6.dp))
-            Text("Koppints egy mezőre az Android automatikus kitöltésének megnyitásához.",
+            Text("Add meg vagy módosítsd a kártyaadatokat, majd másold ki őket a külön gombokkal.",
                 color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp)
             Spacer(Modifier.height(22.dp))
 
-            AutofillField("Kártyaszám", cardNumber, "creditCardNumber", InputType.TYPE_CLASS_NUMBER,
+            AutofillField("Kártyaszám", cardNumber, InputType.TYPE_CLASS_NUMBER,
                 onCardNumberChange, Modifier.fillMaxWidth())
             Spacer(Modifier.height(14.dp))
-            AutofillField("Lejárati dátum", expiry, "creditCardExpirationDate", InputType.TYPE_CLASS_DATETIME,
+            AutofillField("Lejárati dátum", expiry, InputType.TYPE_CLASS_DATETIME,
                 onExpiryChange, Modifier.fillMaxWidth())
             Spacer(Modifier.height(14.dp))
-            AutofillField("CVC / CVV", cvc, "creditCardSecurityCode", InputType.TYPE_CLASS_NUMBER,
+            AutofillField("CVC / CVV", cvc, InputType.TYPE_CLASS_NUMBER,
                 onCvcChange, Modifier.fillMaxWidth())
 
             Spacer(Modifier.height(20.dp))
@@ -264,7 +263,7 @@ private fun CardVaultScreen(
                 }
             }
             Spacer(Modifier.height(14.dp))
-            Text("Az automatikus kitöltéshez legyen beállítva egy kártyaadatokat kezelő Autofill-szolgáltatás a telefonon.",
+            Text("A kártyaadatok csak az alkalmazás bezárásáig maradnak a mezőkben.",
                 fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             if (message != null) {
                 Spacer(Modifier.height(12.dp))
@@ -281,7 +280,7 @@ private fun CardVaultScreen(
 
 @Composable
 private fun AutofillField(
-    label: String, value: String, hint: String, inputType: Int,
+    label: String, value: String, inputType: Int,
     onValueChange: (String) -> Unit, modifier: Modifier = Modifier
 ) {
     val fieldBackground = MaterialTheme.colorScheme.surfaceVariant.toArgb()
@@ -305,22 +304,8 @@ private fun AutofillField(
                         setStroke(1, fieldStroke)
                     }
                     this.inputType = inputType
-                    setAutofillHints(when (hint) {
-                        "creditCardNumber" -> View.AUTOFILL_HINT_CREDIT_CARD_NUMBER
-                        "creditCardExpirationDate" -> View.AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_DATE
-                        else -> View.AUTOFILL_HINT_CREDIT_CARD_SECURITY_CODE
-                    })
-                    importantForAutofill = View.IMPORTANT_FOR_AUTOFILL_YES
-                    setOnClickListener {
-                        val autofillManager = ctx.getSystemService(AutofillManager::class.java)
-                        autofillManager?.requestAutofill(this)
-                    }
-                    setOnFocusChangeListener { view, hasFocus ->
-                        if (hasFocus) view.post {
-                            val autofillManager = ctx.getSystemService(AutofillManager::class.java)
-                            autofillManager?.requestAutofill(view)
-                        }
-                    }
+                    // Ezek az alkalmazáson belül szerkeszthető mezők, nem Android Autofill-célpontok.
+                    importantForAutofill = View.IMPORTANT_FOR_AUTOFILL_NO
                     addTextChangedListener(object : android.text.TextWatcher {
                         override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
                         override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) { onValueChange(s?.toString().orEmpty()) }

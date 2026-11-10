@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Bankkártya -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M22,27 C22,22.6 25.6,19 30,19 L78,19 C82.4,19 86,22.6 86,27 L86,72 C86,76.4 82.4,80 78,80 L30,80 C25.6,80 22,76.4 22,72 Z" />
+    <path
+        android:fillColor="#FF172554"
+        android:pathData="M22,34 L86,34 L86,43 L22,43 Z" />
+    <path
+        android:fillColor="#FFCBD5E1"
+        android:pathData="M31,56 L54,56 L54,62 L31,62 Z" />
+    <!-- Kis arany biztonsági jel -->
+    <path
+        android:fillColor="#FFF4B942"
+        android:pathData="M68,58 C68,51.9 72.9,47 79,47 C85.1,47 90,51.9 90,58 L90,66 L68,66 Z" />
+    <path
+        android:fillColor="#FF172554"
+        android:pathData="M73,58 C73,54.7 75.7,52 79,52 C82.3,52 85,54.7 85,58 L85,62 L73,62 Z" />
+    <path
+        android:fillColor="#FFF4B942"
+        android:pathData="M65,62 L93,62 L93,84 C93,86.2 91.2,88 89,88 L69,88 C66.8,88 65,86.2 65,84 Z" />
+    <path
+        android:fillColor="#FF172554"
+        android:pathData="M79,68 C76.8,68 75,69.8 75,72 C75,73.5 75.8,74.8 77,75.5 L77,81 L81,81 L81,75.5 C82.2,74.8 83,73.5 83,72 C83,69.8 81.2,68 79,68 Z" />
+</vector>
