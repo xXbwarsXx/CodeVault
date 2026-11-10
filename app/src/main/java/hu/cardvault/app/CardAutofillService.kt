@@ -57,8 +57,9 @@ internal fun findCardFields(structure: AssistStructure): List<Pair<AutofillId, S
             listOf("creditcardexpirationdate", "cc-exp", "cardexpiry", "card_expiry", "expiry", "expiration", "lejárat").any { name.contains(it) } -> "expiry"
             else -> null
         }
-        if (type != null && node.autofillId != null && node.autofillType != View.AUTOFILL_TYPE_NONE) {
-            found.add(node.autofillId to type)
+        val autofillId = node.autofillId
+        if (type != null && autofillId != null && node.autofillType != View.AUTOFILL_TYPE_NONE) {
+            found.add(autofillId to type)
         }
         for (i in 0 until node.childCount) visit(node.getChildAt(i))
     }

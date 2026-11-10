@@ -3,7 +3,7 @@ package hu.cardvault.app
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.service.autofill.AutofillService
+import android.view.autofill.AutofillManager
 import android.service.autofill.Dataset
 import android.view.autofill.AutofillId
 import android.view.autofill.AutofillValue
@@ -34,7 +34,7 @@ class FillAuthActivity : FragmentActivity() {
                         ids.zip(types).forEach { (id, type) ->
                             dataset.setValue(id, AutofillValue.forText(if (type == "number") card.first else card.second), presentation)
                         }
-                        setResult(Activity.RESULT_OK, Intent().putExtra(AutofillService.EXTRA_AUTHENTICATION_RESULT, dataset.build()))
+                        setResult(Activity.RESULT_OK, Intent().putExtra(AutofillManager.EXTRA_AUTHENTICATION_RESULT, dataset.build()))
                     } catch (_: Exception) { setResult(Activity.RESULT_CANCELED) }
                     finish()
                 }
