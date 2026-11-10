@@ -5,6 +5,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
@@ -20,6 +21,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -45,12 +47,31 @@ class MainActivity : FragmentActivity() {
         super.onCreate(savedInstanceState)
         window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
         WindowCompat.setDecorFitsSystemWindows(window, false)
+        // Generate the Keystore key before asking for the first unlock, so the
+        // following biometric operation can authorize its first cryptographic use.
+        try { SecureStore(this).prepareKey() } catch (_: Exception) { }
         setContent {
             val context = LocalContext.current
-            var dark by remember { mutableStateOf(false) }
+            val uiPrefs = remember { context.getSharedPreferences("cardvault_ui", Context.MODE_PRIVATE) }
+            var dark by remember { mutableStateOf(uiPrefs.getBoolean("dark", false)) }
+            var useDynamic by remember { mutableStateOf(uiPrefs.getBoolean("dynamic", true)) }
+            var accent by remember { mutableStateOf(uiPrefs.getString("accent", "purple") ?: "purple") }
             var appsPage by remember { mutableStateOf(false) }
             var allowed by remember { mutableStateOf(AllowedApps.get(context)) }
-            MaterialTheme(colorScheme = if (dark) darkColorScheme() else lightColorScheme()) {
+            val accentColor = when (accent) {
+                "blue" -> Color(0xFF315DA8)
+                "green" -> Color(0xFF386B45)
+                "pink" -> Color(0xFF984568)
+                "orange" -> Color(0xFF895000)
+                else -> Color(0xFF6750A4)
+            }
+            val scheme = when {
+                useDynamic && Build.VERSION.SDK_INT >= 31 && dark -> dynamicDarkColorScheme(context)
+                useDynamic && Build.VERSION.SDK_INT >= 31 -> dynamicLightColorScheme(context)
+                dark -> darkColorScheme(primary = accentColor)
+                else -> lightColorScheme(primary = accentColor)
+            }
+            MaterialTheme(colorScheme = scheme) {
                 Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
                     Column(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)
                         .verticalScroll(rememberScrollState()).padding(20.dp)) {
@@ -86,7 +107,26 @@ class MainActivity : FragmentActivity() {
                         } else {
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 Text("Sötét mód")
-                                Switch(checked = dark, onCheckedChange = { dark = it })
+                                Switch(checked = dark, onCheckedChange = {
+                                    dark = it
+                                    uiPrefs.edit().putBoolean("dark", it).apply()
+                                })
+                            }
+                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                Text("Material You színek")
+                                Switch(checked = useDynamic, onCheckedChange = {
+                                    useDynamic = it
+                                    uiPrefs.edit().putBoolean("dynamic", it).apply()
+                                })
+                            }
+                            Text("Kiemelőszín", style = MaterialTheme.typography.titleSmall)
+                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                listOf("purple" to "Lila", "blue" to "Kék", "green" to "Zöld", "pink" to "Rózsaszín", "orange" to "Narancs").forEach { (key, label) ->
+                                    TextButton(onClick = {
+                                        accent = key
+                                        uiPrefs.edit().putString("accent", key).apply()
+                                    }) { Text(label, color = if (accent == key) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface) }
+                                }
                             }
                             Spacer(Modifier.height(10.dp))
                             Text("Titkosított kártyatároló", style = MaterialTheme.typography.titleLarge)

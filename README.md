@@ -1,25 +1,26 @@
-# CardVault v2 – titkosított kártyatároló + Android Autofill
+# CardVault – secure Autofill build
 
-## Funkciók
-- Android Keystore AES-256-GCM, eszközhöz kötött titkosítás, 5 perces Keystore-hitelesítési időablakkal.
-- Ujjlenyomat (BIOMETRIC_STRONG) vagy készülék-PIN/minta/jelszó. A csak gyenge biometrikusnak minősített arcfelismerés **nem** oldhatja fel a Keystore-kulcsot; ez tudatos biztonsági korlátozás.
-- Kártyaszám és lejárat helyi titkosított tárolása; CVC kizárólag memóriában, az alkalmazás háttérbe kerülésekor törlődik.
-- 3 külön másolásgomb, 30 másodperces vágólap-törlési kísérlettel. A vágólap tartalmát más alkalmazások vagy a rendszer korábban elérhetik, ezért a másolás nem tekinthető teljesen biztonságosnak.
-- Android AutofillService, amely a felismerhető bankkártyaszám- és lejáratmezőkhöz kínál kitöltést, csak az engedélyezett alkalmazásokban, azonosítást követően.
-- Engedélyezett alkalmazások képernyő; a rendszer Autofill-beállítását megnyitó gomb.
-- Android 15/16 edge-to-edge státuszsáv / navigációs sáv biztonságos margó.
-- FLAG_SECURE a képernyőképek/recents-előnézetek ellen; backup és eszközátvitel letiltva.
+## Autofill behavior
+- CardVault offers two explicit choices in every enabled app's currently focused editable text field: **Kártyaszám** and **Lejárati dátum**.
+- It does not depend on payment-specific field names or HTML hints. This is intended for apps such as Steam that expose generic text boxes.
+- Only the currently focused field is filled. It never sprays card data into every text field on the screen.
+- Each choice is an authenticated Autofill dataset. Android launches `FillAuthActivity`, which requires a fresh `BIOMETRIC_STRONG` authentication. The actual value is decrypted only after successful authentication.
+- Cancel, biometric failure, or missing strong biometric enrollment returns no data.
+- CVC is not persisted and is not included in Autofill.
 
-## Beállítás
-1. APK telepítése és megnyitása; telefon képernyőzárának beállítása.
-2. Hitelesítés, kártyaszám és lejárat megadása, **Kártyaadatok mentése**.
-3. **Engedélyezett alkalmazások** oldalon jelöld be a Steamet (vagy más appot).
-4. **CardVault beállítása kitöltőként**; válaszd ki a CardVaultot az Android rendszerben.
-5. A fizetési mezőnél válaszd a CardVault-ajánlatot, majd hitelesíts.
+## Storage
+- Card number and expiry are encrypted with AES-256-GCM.
+- The AES key is generated in Android Keystore and is non-exportable; the key requires user authentication for cryptographic use.
+- Android backup is disabled for app data.
 
-## Fontos korlátok
-- A Steam WebView-fizetési mezőinek Autofill-kompatibilitása nem garantált. Az alkalmazás csak az Android által továbbított és megbízhatóan felismerhető mezőket tölti ki.
-- A CVC nem tárolódik, nem autofill-olható. Ha az appot elhagyod, az ideiglenes CVC törlődik.
-- Ha az Android Keystore-kulcs elveszik (például készülékcsere, biztonsági beállítás változása), a titkosított adatok nem állíthatók helyre.
-- Az app nem került helyi Android SDK-val fordításra vagy telefonon tesztelésre ebben a környezetben. GitHub Actions fordítás és valódi készülékes teszt szükséges.
-- A helyi titkosítás nem garantál védelmet kompromittált/rootolt eszköz vagy kártékony billentyűzet ellen.
+## UI
+- Dark-mode preference is persisted.
+- Material You dynamic color can be toggled and persisted on Android 12+.
+- A manual accent-color palette is available when dynamic colors are disabled.
+- The content respects system safe drawing insets so it does not draw under the status bar.
+
+## Important compatibility note
+Android must expose the focused control as an Autofill-capable node in its AssistStructure for any Autofill service to receive it. Some apps/WebViews/custom controls suppress Autofill entirely. In that case, no third-party Autofill provider can force Android to offer the field. Test the Steam checkout UI after enabling CardVault in Android's Autofill service settings and allowing Steam in CardVault.
+
+## Build
+The GitHub Actions workflow uses JDK 17, Android SDK 36, Gradle 8.11.1 and runs `gradle assembleDebug`.

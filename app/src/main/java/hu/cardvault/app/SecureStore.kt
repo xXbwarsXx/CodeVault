@@ -17,6 +17,11 @@ internal class SecureStore(private val context: Context) {
     private val prefs = context.getSharedPreferences("vault_ciphertext_v2", Context.MODE_PRIVATE)
     private val alias = "cardvault_aes_v2"
 
+    /** Create the non-exportable Keystore key before the first biometric unlock. */
+    fun prepareKey() {
+        key()
+    }
+
     private fun key(): SecretKey {
         val ks = KeyStore.getInstance("AndroidKeyStore").apply { load(null) }
         (ks.getKey(alias, null) as? SecretKey)?.let { return it }
