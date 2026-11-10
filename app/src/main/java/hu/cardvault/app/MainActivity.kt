@@ -11,6 +11,7 @@ import android.view.autofill.AutofillManager
 import android.view.View
 import android.widget.EditText
 import android.text.InputType
+import androidx.activity.ComponentActivity
 import androidx.fragment.app.FragmentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.compose.BackHandler
